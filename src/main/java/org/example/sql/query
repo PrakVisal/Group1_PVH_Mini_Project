@@ -1,0 +1,11 @@
+create table product
+(
+    id           serial primary key,
+    product_name varchar(100)   not null,
+    quantity     integer        not null,
+    unit_price   numeric(10, 2) not null,
+    import_date  timestamp default CURRENT_TIMESTAMP
+);
+
+alter table product
+    owner to postgres;
