@@ -10,6 +10,7 @@ public class Product {
     private int quantity;
     private LocalDate importedDate;
 
+    public Product() {}
     public Product(int id, String name,int quantity, double unitPrice,LocalDate importedDate) {
         this.id = id;
         this.name = name;

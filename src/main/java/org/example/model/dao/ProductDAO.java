@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface ProductDAO {
     public void writeProduct(List<Product> product) throws SQLException;
-    public void unSaveProduct(List<Product> product);
+    public void unSaveProduct(List<Product> productInsert,List<Product> productUpdate) throws SQLException;
     public void saveProduct(List<Product> product) throws SQLException;
     public void updateProduct(List<Product> product);
     public void deleteProduct();

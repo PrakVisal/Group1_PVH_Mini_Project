@@ -8,7 +8,6 @@ import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.ShownBorders;
 import org.nocrala.tools.texttablefmt.Table;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -20,7 +19,8 @@ public class ProductView {
             String option = null;
             Scanner sc = new Scanner(System.in);
             ProductController productController = new ProductController();
-            ArrayList<Product> listUnsaved = new ArrayList<>();
+            ArrayList<Product> listUnsavedInsert = new ArrayList<>();
+            ArrayList<Product> listUnsavedUpdate = new ArrayList<>();
 
             do {
                 List<Product> productList = productController.getAllProducts();
@@ -31,20 +31,19 @@ public class ProductView {
                 option = sc.nextLine().trim().toLowerCase();
                 switch (option){
                     case "w":{
-                        productController.writeProduct(listUnsaved);
+                        productController.writeProduct(listUnsavedInsert);
                         break;
                     }
                     case "us":{
-                        productController.unSaveProduct(listUnsaved);
+                        productController.unSaveProduct(listUnsavedInsert,listUnsavedUpdate);
+                        break;
                     }
-                    case "0":{
-                        listUnsaved.forEach(data -> {
-                            System.out.println(data.getName()+"\t"+data.getUnitPrice()+"\t"+data.getQuantity());
-                        });
+                    case "u":{
+                        productController.updateProduct(listUnsavedUpdate);
                         break;
                     }
                     case "sa":{
-                        productController.saveProduct(listUnsaved);
+                        productController.saveProduct(listUnsavedInsert);
                         break;
                     }
                     case "r":{
