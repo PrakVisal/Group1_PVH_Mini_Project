@@ -19,7 +19,7 @@ public class ProductController {
         productDAO.unSaveProduct(product);
     }
     public void seachProductbyID() throws SQLException {
-        productDAO.seachProductbyID();
+        productDAO.searchProductbyID();
     }
     public List<Product> getAllProducts() throws SQLException {
         return productDAO.getAllProducts();

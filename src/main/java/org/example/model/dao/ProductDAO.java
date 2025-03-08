@@ -11,7 +11,8 @@ public interface ProductDAO {
     public void saveProduct(List<Product> product) throws SQLException;
     public void updateProduct(List<Product> product);
     public void deleteProduct();
-    public void seachProductbyID();
+    public void searchProductbyID();
+    public void searchProductbyName();
     public List<Product> getAllProducts();
 
 }

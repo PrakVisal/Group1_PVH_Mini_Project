@@ -1,7 +1,9 @@
 package org.example.model.dao;
 
 import org.example.config.DatabaseConnection;
+import org.example.config.color.Color;
 import org.example.model.Product;
+import org.example.view.ProductView;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -14,11 +16,12 @@ import java.util.*;
 public class ProductDAOImpl implements ProductDAO {
     Scanner sc = new Scanner(System.in);
 
-    private DatabaseConnection databaseConnection;
+    private final DatabaseConnection databaseConnection;
     public ProductDAOImpl()
     {
         this.databaseConnection = new DatabaseConnection();
     }
+
     public List<Product> getAllProducts() {
         ArrayList<Product> allProducts = new ArrayList<>();
         try(Statement statement = databaseConnection.getConnection().createStatement()){
@@ -38,20 +41,38 @@ public class ProductDAOImpl implements ProductDAO {
         return allProducts;
     }
     @Override
-    public  void saveProduct(List<Product> productList) throws SQLException {
-        String query = "INSERT INTO product (product_name, quantity, unit_price, import_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
-        try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(query)) {
-            for (Product p : productList) {
-                preparedStatement.setString(1, p.getName());
-                preparedStatement.setInt(2, p.getQuantity());
-                preparedStatement.setBigDecimal(3, new BigDecimal(p.getUnitPrice()));
-                preparedStatement.executeUpdate(); // Execute insert
-                System.out.println("write  to sucess");
+    public void saveProduct(List<Product> productList) throws SQLException {
+        String option = null;
+        do {
+            System.out.println("Enter option: ");
+            option = sc.nextLine();
+            switch (option){
+                case "si":{
+                    String query = "INSERT INTO product (product_name, quantity, unit_price, import_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+                    try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(query)) {
+                        for (Product p : productList) {
+                            preparedStatement.setString(1, p.getName());
+                            preparedStatement.setInt(2, p.getQuantity());
+                            preparedStatement.setBigDecimal(3, new BigDecimal(p.getUnitPrice()));
+                            preparedStatement.executeUpdate(); // Execute insert
+                            System.out.println("Inserted successfully");
+                        }
+                    } catch (SQLException e) {
+                        System.out.println("Error inserting products: " + e.getMessage());
+                        throw e;
+                    }
+                    break;
+                }
+                case "su":{
+                    //not done
+                    break;
+                }
+                case "b":{
+                    System.out.println(Color.YELLOW+"Exiting program..."+Color.RESET+"\n");
+                    break;
+                }
             }
-        } catch (SQLException e) {
-            System.out.println("Error inserting products: " + e.getMessage());
-            throw e;
-        }
+        }while(!option.equalsIgnoreCase("b"));
     }
     @Override
     public void unSaveProduct(List<Product> product) {
@@ -92,12 +113,10 @@ public class ProductDAOImpl implements ProductDAO {
         Product products = new Product(id,name,quantity,unitPrice,LocalDate.now());
         product.add(products);
     }
-
     @Override
     public void updateProduct(List<Product> product) {
 
     }
-
     @Override
     public void deleteProduct() {
         System.out.println("Enter id to delete product");
@@ -114,13 +133,20 @@ public class ProductDAOImpl implements ProductDAO {
 
 
     }
-
     @Override
-    public void seachProductbyID() {
+    public void searchProductbyID() {
+//        ProductView.tableDisplay(getAllProducts());
             System.out.println("Enter id: ");
             int inputId = sc.nextInt();
                getAllProducts().stream().filter(product -> product.getId() == inputId).forEach(product -> {
                    System.out.println(product);
                });
+    }
+
+    @Override
+    public void searchProductbyName() {
+        System.out.println("Enter name: ");
+        String inputName = sc.nextLine();
+        getAllProducts().stream().filter(searchedProduct -> searchedProduct.getName().equalsIgnoreCase(inputName)).forEach(data-> System.out.println(data));
     }
 }
