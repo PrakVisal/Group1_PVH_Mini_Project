@@ -48,7 +48,7 @@ public class ProductView {
                         break;
                     }
                     case "r":{
-                        productController.seachProductbyID();
+                        productController.searchProductbyID();
                         break;
                     }
                     case "d":{
@@ -56,7 +56,7 @@ public class ProductView {
                         break;
                     }
                     case "s":{
-
+                        productController.searchProductbyName();
                     }
                 }
             }while (!option.equalsIgnoreCase("e"));
@@ -76,8 +76,8 @@ public class ProductView {
 
         t.addCell(Color.PURPLE + "ID" + Color.RESET, cellStyle);
         t.addCell(Color.PURPLE + "NAME" + Color.RESET, cellStyle);
-        t.addCell(Color.PURPLE + "UNIT PRICE" + Color.RESET, cellStyle);
         t.addCell(Color.PURPLE + "QTY" + Color.RESET, cellStyle);
+        t.addCell(Color.PURPLE + "UNIT PRICE" + Color.RESET, cellStyle);
         t.addCell(Color.PURPLE + "IMPORT DATE" + Color.RESET, cellStyle);
 
         for(Product product : productData){

@@ -12,14 +12,17 @@ public class ProductController {
     public void saveProduct(List<Product> product) throws SQLException {
         productDAO.saveProduct(product);
     }
-    public void writeProduct(List<Product> product) throws SQLException {
+    public void writeProduct(List<Product> product){
         productDAO.writeProduct(product);
     }
     public void unSaveProduct(List<Product> product) throws SQLException {
         productDAO.unSaveProduct(product);
     }
-    public void seachProductbyID() throws SQLException {
+    public void searchProductbyID() throws SQLException {
         productDAO.searchProductbyID();
+    }
+    public void searchProductbyName() throws SQLException {
+        productDAO.searchProductbyName();
     }
     public List<Product> getAllProducts() throws SQLException {
         return productDAO.getAllProducts();

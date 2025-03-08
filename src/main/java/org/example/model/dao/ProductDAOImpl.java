@@ -44,10 +44,12 @@ public class ProductDAOImpl implements ProductDAO {
     public void saveProduct(List<Product> productList) throws SQLException {
         String option = null;
         do {
+            System.out.println("(si) for save insert \n(su) for save update \n(b) back");
             System.out.println("Enter option: ");
             option = sc.nextLine();
             switch (option){
                 case "si":{
+
                     String query = "INSERT INTO product (product_name, quantity, unit_price, import_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
                     try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(query)) {
                         for (Product p : productList) {
@@ -55,8 +57,9 @@ public class ProductDAOImpl implements ProductDAO {
                             preparedStatement.setInt(2, p.getQuantity());
                             preparedStatement.setBigDecimal(3, new BigDecimal(p.getUnitPrice()));
                             preparedStatement.executeUpdate(); // Execute insert
-                            System.out.println("Inserted successfully");
+                            System.out.println(Color.GREEN+"Inserted successfully"+Color.RESET);
                         }
+                        productList.clear();
                     } catch (SQLException e) {
                         System.out.println("Error inserting products: " + e.getMessage());
                         throw e;
@@ -99,7 +102,12 @@ public class ProductDAOImpl implements ProductDAO {
     @Override
     public void writeProduct(List<Product> product) {
         Scanner sc = new Scanner(System.in);
-        int id = getAllProducts().getLast().getId();;
+        int id;
+        if(getAllProducts().isEmpty()){
+            id =0;
+        }else {
+            id = getAllProducts().getLast().getId();
+        }
         String name = null;
         double unitPrice = 0;
         int quantity = 0;
@@ -147,6 +155,26 @@ public class ProductDAOImpl implements ProductDAO {
     public void searchProductbyName() {
         System.out.println("Enter name: ");
         String inputName = sc.nextLine();
-        getAllProducts().stream().filter(searchedProduct -> searchedProduct.getName().equalsIgnoreCase(inputName)).forEach(data-> System.out.println(data));
+        String queryAlike = "SELECT * FROM product WHERE product_name LIKE ?";
+        List<Product> foundData = new ArrayList<>();
+        try(PreparedStatement ps = databaseConnection.getConnection().prepareStatement(queryAlike)){
+            ps.setString(1, "%"+inputName+"%");
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                int id = rs.getInt("id");
+                String name = rs.getString("product_name");
+                int quantity = rs.getInt("quantity");
+                double unitPrice = rs.getDouble("unit_price");
+                LocalDate importDate = rs.getDate("import_date").toLocalDate();
+                foundData.add(new Product(id,name,quantity,unitPrice,importDate));
+
+            }
+            ProductView.table(foundData);
+            System.out.println("Press any key to continue...");
+            sc.nextLine();
+
+        }catch (SQLException e){
+            e.printStackTrace();
+        }
     }
 }
