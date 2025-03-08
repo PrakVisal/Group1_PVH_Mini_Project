@@ -8,7 +8,7 @@ import java.sql.Statement;
 public class DatabaseConnection {
           final String URL = "jdbc:postgresql://localhost:5432/stock_management";
           final String USER = "postgres";
-          final String PASSWORD = "password";
+          final String PASSWORD = "21052004";
           private Connection connection;
           public Connection getConnection() throws SQLException {
               return DriverManager.getConnection(URL, USER, PASSWORD);

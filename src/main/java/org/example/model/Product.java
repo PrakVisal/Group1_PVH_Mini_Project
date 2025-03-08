@@ -17,6 +17,8 @@ public class Product {
         this.unitPrice = unitPrice;
         this.importedDate = importedDate;
     }
+
+
     public String getName() {
         return name;
     }

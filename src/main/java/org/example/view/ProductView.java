@@ -8,7 +8,6 @@ import org.nocrala.tools.texttablefmt.CellStyle;
 import org.nocrala.tools.texttablefmt.ShownBorders;
 import org.nocrala.tools.texttablefmt.Table;
 
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -16,19 +15,22 @@ import java.util.Scanner;
 public class ProductView {
     public static void displayProduct()
     {
+        String option = null;
+        Scanner sc = new Scanner(System.in);
+        ProductController productController = new ProductController();
+        ArrayList<Product> listUnsaved = new ArrayList<>();
+
         try{
-            String option = null;
-            Scanner sc = new Scanner(System.in);
-            ProductController productController = new ProductController();
-            ArrayList<Product> listUnsaved = new ArrayList<>();
+
 
             do {
                 List<Product> productList = productController.getAllProducts();
                 table(productList);
                 System.out.println("(W).Write \t (R).Read(id) \t (U).Update \t (D).Delete \t (S).Search(name) \t (Se).Set row");
                 System.out.println("(Sa).Save \t (Us).Unsaved \t (Ba).Backup \t (Re).Restore \t (E)Exit");
-                System.out.println("Choose an option:");
+                System.out.print("Choose an option:");
                 option = sc.nextLine().trim().toLowerCase();
+
                 switch (option){
                     case "w":{
                         productController.writeProduct(listUnsaved);
@@ -36,11 +38,17 @@ public class ProductView {
                     }
                     case "us":{
                         productController.unSaveProduct(listUnsaved);
+                        break;
                     }
                     case "0":{
-                        listUnsaved.forEach(data -> {
-                            System.out.println(data.getName()+"\t"+data.getUnitPrice()+"\t"+data.getQuantity());
-                        });
+                        if(listUnsaved.isEmpty()){
+                            System.out.println("No unsaved products.");
+
+                        }else {
+                            listUnsaved.forEach(data -> {
+                                System.out.println(data.getName() + "\t" + data.getUnitPrice() + "\t" + data.getQuantity());
+                            });
+                        }
                         break;
                     }
                     case "sa":{
@@ -56,12 +64,23 @@ public class ProductView {
                         break;
                     }
                     case "s":{
+                        productController.searchProductByName();
+                        break;
+                    }
+                    case "e":{
 
+                        System.out.println("Exiting...");
+                        break;
                     }
                 }
             }while (!option.equalsIgnoreCase("e"));
         } catch (Exception e) {
-            throw new RuntimeException(e);
+//            throw new RuntimeException(e);
+            System.err.println("An error occurred: " + e.getMessage());
+            e.printStackTrace();
+        }
+        finally {
+            sc.close();
         }
     }
      public static void table(List<Product> productData)  {
@@ -79,6 +98,7 @@ public class ProductView {
         t.addCell(Color.PURPLE + "UNIT PRICE" + Color.RESET, cellStyle);
         t.addCell(Color.PURPLE + "QTY" + Color.RESET, cellStyle);
         t.addCell(Color.PURPLE + "IMPORT DATE" + Color.RESET, cellStyle);
+
 
         for(Product product : productData){
             t.addCell(Color.YELLOW + product.getId() + Color.RESET, cellStyle);

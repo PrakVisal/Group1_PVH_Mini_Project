@@ -3,6 +3,7 @@ package org.example.model.dao;
 import org.example.config.DatabaseConnection;
 import org.example.config.color.Color;
 import org.example.model.Product;
+import org.example.validate.Validate;
 import org.example.view.ProductView;
 
 import java.math.BigDecimal;
@@ -12,6 +13,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.example.view.ProductView.table;
 
 public class ProductDAOImpl implements ProductDAO {
     Scanner sc = new Scanner(System.in);
@@ -44,8 +48,9 @@ public class ProductDAOImpl implements ProductDAO {
     public void saveProduct(List<Product> productList) throws SQLException {
         String option = null;
         do {
-            System.out.println("Enter option: ");
-            option = sc.nextLine();
+            System.out.println("(Si) for unsave insert \t (Su) for unsave update \t (b) back");
+            System.out.print("Enter option: ");
+            option = sc.nextLine().trim().toLowerCase();
             switch (option){
                 case "si":{
                     String query = "INSERT INTO product (product_name, quantity, unit_price, import_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
@@ -56,6 +61,7 @@ public class ProductDAOImpl implements ProductDAO {
                             preparedStatement.setBigDecimal(3, new BigDecimal(p.getUnitPrice()));
                             preparedStatement.executeUpdate(); // Execute insert
                             System.out.println("Inserted successfully");
+                            table(productList);
                         }
                     } catch (SQLException e) {
                         System.out.println("Error inserting products: " + e.getMessage());
@@ -64,7 +70,7 @@ public class ProductDAOImpl implements ProductDAO {
                     break;
                 }
                 case "su":{
-                    //not done
+
                     break;
                 }
                 case "b":{
@@ -99,20 +105,51 @@ public class ProductDAOImpl implements ProductDAO {
     @Override
     public void writeProduct(List<Product> product) {
         Scanner sc = new Scanner(System.in);
-        int id = getAllProducts().getLast().getId();;
+        int id = getAllProducts().get(getAllProducts().size() - 1).getId();
         String name = null;
         double unitPrice = 0;
         int quantity = 0;
-        System.out.println("ID: "+(++id));
+        LocalDate importDate = LocalDate.now();
+
+        System.out.println("ID: " + (++id));
         System.out.println("Enter Name: ");
         name = sc.nextLine();
-        System.out.println("Enter UnitPrice: ");
-        unitPrice = sc.nextDouble();
-        System.out.println("Enter Quantity: ");
-        quantity = sc.nextInt();
-        Product products = new Product(id,name,quantity,unitPrice,LocalDate.now());
-        product.add(products);
+
+        boolean validUnitPrice = false;
+        while (!validUnitPrice) {
+            System.out.println("Enter Unit Price: ");
+            if (sc.hasNextDouble()) {
+                unitPrice = sc.nextDouble();
+                validUnitPrice = true;
+            } else {
+                System.out.println("Invalid input. Please enter a valid unit price (e.g., 2.5).");
+                sc.next();
+            }
+        }
+
+        sc.nextLine();
+
+
+        boolean validQuantity = false;
+        while (!validQuantity) {
+            System.out.println("Enter Quantity: ");
+            if (sc.hasNextInt()) {
+                quantity = sc.nextInt();
+                validQuantity = true;
+            } else {
+                System.out.println("Invalid input. Please enter a valid quantity (integer).");
+                sc.next();
+            }
+        }
+        if (Validate.validateProduct(id, name, quantity, unitPrice, importDate)) {
+            Product newProduct = new Product(id, name, quantity, unitPrice, importDate);
+            product.add(newProduct);
+            System.out.println("Product added successfully.");
+        } else {
+            System.out.println("Product validation failed. Please try again.");
+        }
     }
+
     @Override
     public void updateProduct(List<Product> product) {
 
@@ -135,18 +172,61 @@ public class ProductDAOImpl implements ProductDAO {
     }
     @Override
     public void searchProductbyID() {
-//        ProductView.tableDisplay(getAllProducts());
-            System.out.println("Enter id: ");
-            int inputId = sc.nextInt();
-               getAllProducts().stream().filter(product -> product.getId() == inputId).forEach(product -> {
-                   System.out.println(product);
-               });
+        System.out.print("Enter product ID: ");
+        String inputID = sc.nextLine().trim();
+
+        try {
+            int productID = Integer.parseInt(inputID);
+            String query = "SELECT * FROM product WHERE id = ?";
+            try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(query)) {
+                preparedStatement.setInt(1, productID);
+                ResultSet resultSet = preparedStatement.executeQuery();
+
+                List<Product> matchedProductsID = new ArrayList<>();
+
+                while (resultSet.next()) {
+
+                    Product product = new Product(
+                            resultSet.getInt("id"),
+                            resultSet.getString("product_name"),
+                            resultSet.getInt("quantity"),
+                            resultSet.getDouble("unit_price"),
+                            resultSet.getDate("import_date").toLocalDate()
+                    );
+                    matchedProductsID.add(product);
+
+                }
+
+                if (matchedProductsID.isEmpty()) {
+                    System.out.println("No products found with the ID: " + productID);
+                } else {
+                    table(matchedProductsID);
+                }
+
+            } catch (SQLException e) {
+                System.out.println("Error querying the database: " + e.getMessage());
+            }
+
+        } catch (NumberFormatException e) {
+            System.out.println("Invalid ID. Please enter a valid number.");
+        }
     }
+
 
     @Override
     public void searchProductbyName() {
-        System.out.println("Enter name: ");
-        String inputName = sc.nextLine();
-        getAllProducts().stream().filter(searchedProduct -> searchedProduct.getName().equalsIgnoreCase(inputName)).forEach(data-> System.out.println(data));
+        System.out.print("Enter product name: ");
+        String inputName = sc.nextLine().trim();
+
+        List<Product> matchedProducts = getAllProducts().stream()
+                .filter(searchedProduct -> searchedProduct.getName().equalsIgnoreCase(inputName))
+                .collect(Collectors.toList());
+
+        if (matchedProducts.isEmpty()) {
+            System.out.println("No products found with the name: " + inputName);
+        } else {
+            table(matchedProducts);
+        }
     }
+
 }

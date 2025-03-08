@@ -27,5 +27,8 @@ public class ProductController {
     public void deleteProductById() throws SQLException {
         productDAO.deleteProduct();
     }
+    public void searchProductByName(){
+        productDAO.searchProductbyName();
+    }
 }
 
