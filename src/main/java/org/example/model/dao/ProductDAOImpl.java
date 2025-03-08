@@ -2,19 +2,15 @@ package org.example.model.dao;
 
 import org.example.config.DatabaseConnection;
 import org.example.config.color.Color;
-import org.example.controller.ProductController;
 import org.example.model.Product;
 import org.example.validate.Validate;
-import org.example.view.ProductView;
 
+import java.io.*;
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Date;
 
 import static org.example.view.ProductView.table;
 
@@ -274,6 +270,73 @@ public class ProductDAOImpl implements ProductDAO {
         } catch (SQLException e) {
             System.out.println(Color.RED+"Error querying the database: " + e.getMessage()+Color.RESET);
         }
+    }
+
+
+
+    @Override
+    public void backupProducts(String backupFilePath) throws SQLException {
+        String query = "SELECT * FROM product";
+        try (PreparedStatement pstmt = databaseConnection.getConnection().prepareStatement(query);
+             ResultSet rs = pstmt.executeQuery();
+             BufferedWriter writer = new BufferedWriter(new FileWriter(backupFilePath))) {
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                String name = rs.getString("name");
+                double unitPrice = rs.getDouble("price");
+                int quantity = rs.getInt("qty");
+                Date date = rs.getDate("date");
+                writer.write(id + "," + name + "," + unitPrice + "," + quantity + "," + date);
+                writer.newLine();
+            }
+            System.out.println("Backup complete to: " + backupFilePath);
+        } catch (SQLException | IOException e) {
+            System.out.println("Error during backup: " + e.getMessage());
+            throw new SQLException("Backup failed: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void restoreProducts(String backupFilePath) throws SQLException {
+        File backupFile = new File(backupFilePath);
+        if (!backupFile.exists()) {
+            System.out.println("Backup file not found: " + backupFilePath);
+            return;
+        }
+
+        String query = "INSERT INTO product (name, price, qty, date) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement pstmt = databaseConnection.getConnection().prepareStatement(query);
+             BufferedReader reader = new BufferedReader(new FileReader(backupFilePath))) {
+            String line;
+            int count = 0;
+
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts.length == 5) {
+                    pstmt.setString(1, parts[1]);
+                    pstmt.setDouble(2, Double.parseDouble(parts[2]));
+                    pstmt.setInt(3, Integer.parseInt(parts[3]));
+                    pstmt.setDate(4, java.sql.Date.valueOf(parts[4]));
+                    pstmt.addBatch();
+                    count++;
+                } else {
+                    System.out.println("Skipping invalid line: " + line);
+                }
+            }
+            pstmt.executeBatch();
+            System.out.println("Restore complete. Total rows processed: " + count);
+        } catch (SQLException | IOException e) {
+            System.out.println("Error during restore: " + e.getMessage());
+            throw new SQLException("Restore failed: " + e.getMessage(), e);
+        }
+    }
+
+    public String[] listBackupFiles() {
+        File backupDir = new File("backups");
+        if (!backupDir.exists()) {
+            return new String[0]; // Return empty array if no backups exist
+        }
+        return backupDir.list((dir, name) -> name.startsWith("backup") && name.endsWith(".txt"));
     }
 
 

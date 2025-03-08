@@ -14,5 +14,7 @@ public interface ProductDAO {
     public void searchProductbyID();
     public void searchProductbyName();
     public List<Product> getAllProducts();
+    public void backupProducts(String backupFilePath) throws SQLException;
+    public void restoreProducts(String backupFilePath) throws SQLException;
 
 }

@@ -67,11 +67,22 @@ public class ProductView {
                         productController.searchProductByName();
                         break;
                     }
+
+                    case "ba": {
+                        productController.backupProducts();
+                        break;
+                    }
+                    case "re": {
+                        productController.restoreProducts();
+                        break;
+                    }
+
                     case "e":{
 
                         System.out.println("Exiting...");
                         break;
                     }
+
                 }
             }while (!option.equalsIgnoreCase("e"));
         } catch (Exception e) {
