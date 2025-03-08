@@ -62,6 +62,7 @@ public class ProductDAOImpl implements ProductDAO {
         }
         return allProducts;
     }
+
     @Override
     public void saveProduct(List<Product> productList, List<Product> productsListUpdate) throws SQLException {
         String option;
@@ -104,8 +105,10 @@ public class ProductDAOImpl implements ProductDAO {
                             preparedStatement.setDate(4,Date.valueOf(p.getImportedDate()));
                             preparedStatement.setInt(5, p.getId());
                             preparedStatement.executeUpdate(); // Execute insert
-                            System.out.println(Color.GREEN+"Updated successfully"+Color.RESET);
+
                         }
+                        System.out.println(Color.GREEN+"Updated successfully"+Color.RESET);
+                        table(productList);
                         productsListUpdate.clear();
                     } catch (SQLException e) {
                         System.out.println("Error updating products: " + e.getMessage());
@@ -129,11 +132,11 @@ public class ProductDAOImpl implements ProductDAO {
             option = sc.nextLine().trim().toLowerCase();
             switch (option){
                 case "ui":{
-                    ProductView.table(productInsert);
+                    table(productInsert);
                     break;
                 }
                 case "uu":{
-                    ProductView.table(productUpdate);
+                    table(productUpdate);
                     break;
                 }
                 case "b":{
@@ -198,7 +201,7 @@ public class ProductDAOImpl implements ProductDAO {
                 LocalDate importDate = rs.getDate(5).toLocalDate();
                 searchRowforShow.add(new Product(id,name,quantity,unitPrice,importDate));
             }
-            ProductView.table(searchRowforShow);
+            table(searchRowforShow);
             searchRowforShow.clear();
             System.out.println("1. Name \t 2. Unit Price \t 3. Qty \t 4. All Field \t 5. Exit");
             int op=0;
@@ -269,14 +272,27 @@ public class ProductDAOImpl implements ProductDAO {
 
     @Override
     public void deleteProduct() {
-        System.out.print("Enter id to delete product: ");
-        int idInputed = sc.nextInt();
-        sc.nextLine();
+        int idInputed = 0;
+        boolean validId = false;
 
+        while (!validId) {
+            System.out.print("Enter product ID: ");
+            String input = sc.nextLine();
+
+            try {
+                idInputed = Integer.parseInt(input);
+                validId = Validate.validateProductId(idInputed);
+            } catch (NumberFormatException e) {
+                System.out.println(Color.RED + "Invalid input. Please enter a valid numeric product ID." + Color.RESET);
+            }
+        }
+
+        int finalIdInputed = idInputed;
         Product product = getAllProducts().stream()
-                .filter(e -> e.getId() == idInputed)
+                .filter(e -> e.getId() == finalIdInputed)
                 .findFirst()
                 .orElse(null);
+
         if (product == null) {
             System.out.println(Color.RED+"Product with ID " + idInputed + " not found."+Color.RESET);
             return;
@@ -367,7 +383,7 @@ public class ProductDAOImpl implements ProductDAO {
                 foundData.add(new Product(id,name,quantity,unitPrice,importDate));
 
             }
-            ProductView.table(foundData);
+            table(foundData);
             System.out.println(Color.YELLOW+"Press any key to continue..."+Color.RESET);
             sc.nextLine();
 

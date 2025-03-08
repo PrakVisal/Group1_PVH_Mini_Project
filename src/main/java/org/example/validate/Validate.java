@@ -3,6 +3,7 @@ package org.example.validate;
 import org.example.config.color.Color;
 
 import java.time.LocalDate;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Validate {
@@ -49,6 +50,18 @@ public class Validate {
         }
         return true;
     }
+    public static boolean validateProductId(int id) {
+        try {
+            if (id <= 0) {
+                System.out.println(Color.RED + "Product ID must be greater than zero." + Color.RESET);
+                return false;
+            }
+            return true;
+        } catch (InputMismatchException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     public static boolean validateProduct(int id, String name, int quantity, double unitPrice, LocalDate importDate) {
         if (!validateName(name)) {
