@@ -18,13 +18,15 @@ public class ProductView {
         String option = null;
         Scanner sc = new Scanner(System.in);
         ProductController productController = new ProductController();
-        ArrayList<Product> listUnsaved = new ArrayList<>();
+        ArrayList<Product> listUnsavedInsert = new ArrayList<>();
+        ArrayList<Product> listUnsavedUpdate = new ArrayList<>();
 
         try{
 
 
             do {
                 List<Product> productList = productController.getAllProducts();
+                table(productList);
                 System.out.println("(W).Write \t (R).Read(id) \t (U).Update \t (D).Delete \t (S).Search(name) \t (Se).Set row");
                 System.out.println("(Sa).Save \t (Us).Unsaved \t (Ba).Backup \t (Re).Restore \t (E)Exit");
                 System.out.print("Choose an option:");
@@ -32,27 +34,27 @@ public class ProductView {
 
                 switch (option){
                     case "w":{
-                        table(productList);
-                        productController.writeProduct(listUnsaved);
+//                        table(productList);
+                        productController.writeProduct(listUnsavedInsert);
                         break;
                     }
                     case "us":{
-                        productController.unSaveProduct(listUnsaved);
+                        productController.unSaveProduct(listUnsavedInsert,listUnsavedUpdate);
                         break;
                     }
                     case "0":{
-                        if(listUnsaved.isEmpty()){
+                        if(listUnsavedInsert.isEmpty()){
                             System.out.println("No unsaved products.");
 
                         }else {
-                            listUnsaved.forEach(data -> {
+                            listUnsavedInsert.forEach(data -> {
                                 System.out.println(data.getName() + "\t" + data.getUnitPrice() + "\t" + data.getQuantity());
                             });
                         }
                         break;
                     }
                     case "sa":{
-                        productController.saveProduct(listUnsaved);
+                        productController.saveProduct(listUnsavedInsert,listUnsavedUpdate);
                         break;
                     }
                     case "r":{
@@ -68,8 +70,8 @@ public class ProductView {
                         break;
                     }
                     case "u":{
-                        table(productList);
-                        productController.updateData(listUnsaved);
+//                        table(productList);
+                        productController.updateData(listUnsavedUpdate);
                         break;
                     }
                     case "e":{

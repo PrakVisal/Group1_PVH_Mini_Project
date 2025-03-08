@@ -9,14 +9,14 @@ import java.util.List;
 
 public class ProductController {
     ProductDAOImpl productDAO = new ProductDAOImpl();
-    public void saveProduct(List<Product> product) throws SQLException {
-        productDAO.saveProduct(product);
+    public void saveProduct(List<Product> productInsert,List<Product> productUpdate) throws SQLException {
+        productDAO.saveProduct(productInsert,productUpdate);
     }
     public void writeProduct(List<Product> product) throws SQLException {
             productDAO.writeProduct(product);
     }
-    public void unSaveProduct(List<Product> product) throws SQLException {
-        productDAO.unSaveProduct(product);
+    public void unSaveProduct(List<Product> productInsert,List<Product>productUpdate) throws SQLException {
+        productDAO.unSaveProduct(productInsert,productUpdate);
     }
     public void seachProductbyID() throws SQLException {
         productDAO.searchProductbyID();

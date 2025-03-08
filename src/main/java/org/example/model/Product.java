@@ -17,6 +17,10 @@ public class Product {
         this.importedDate = importedDate;
     }
 
+    public Product() {
+
+    }
+
 
     public String getName() {
         return name;
