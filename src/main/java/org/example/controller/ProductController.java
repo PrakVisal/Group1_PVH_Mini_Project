@@ -13,7 +13,7 @@ public class ProductController {
         productDAO.saveProduct(product);
     }
     public void writeProduct(List<Product> product) throws SQLException {
-        productDAO.writeProduct(product);
+            productDAO.writeProduct(product);
     }
     public void unSaveProduct(List<Product> product) throws SQLException {
         productDAO.unSaveProduct(product);
