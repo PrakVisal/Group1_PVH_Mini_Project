@@ -7,6 +7,7 @@ import org.example.vaildate.Validate;
 import org.example.view.ProductView;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -42,7 +43,7 @@ public class ProductDAOImpl implements ProductDAO {
         return allProducts;
     }
     @Override
-    public void saveProduct(List<Product> productList) throws SQLException {
+    public void saveProduct(List<Product> productListInsert, List<Product> productsListUpdate) throws SQLException {
         String option = null;
         do {
             System.out.println("(si) for save insert \n(su) for save update \n(b) back");
@@ -52,14 +53,14 @@ public class ProductDAOImpl implements ProductDAO {
                 case "si":{
                     String query = "INSERT INTO product (product_name, quantity, unit_price, import_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
                     try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(query)) {
-                        for (Product p : productList) {
+                        for (Product p : productListInsert) {
                             preparedStatement.setString(1, p.getName());
                             preparedStatement.setInt(2, p.getQuantity());
                             preparedStatement.setBigDecimal(3, new BigDecimal(p.getUnitPrice()));
                             preparedStatement.executeUpdate(); // Execute insert
                             System.out.println(Color.GREEN+"Inserted successfully"+Color.RESET);
                         }
-                        productList.clear();
+                        productListInsert.clear();
                     } catch (SQLException e) {
                         System.out.println("Error inserting products: " + e.getMessage());
                         throw e;
@@ -67,7 +68,22 @@ public class ProductDAOImpl implements ProductDAO {
                     break;
                 }
                 case "su":{
-                    //not done
+                    String updateQuery = "UPDATE product SET product_name = ?, quantity = ?, unit_price = ?, import_date = ? WHERE id = ?";
+                    try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(updateQuery)) {
+                        for (Product p : productsListUpdate) {
+                            preparedStatement.setString(1, p.getName());
+                            preparedStatement.setInt(2, p.getQuantity());
+                            preparedStatement.setBigDecimal(3, new BigDecimal(p.getUnitPrice()));
+                            preparedStatement.setDate(4,Date.valueOf(p.getImportedDate()));
+                            preparedStatement.setInt(5, p.getId());
+                            preparedStatement.executeUpdate(); // Execute insert
+                            System.out.println(Color.GREEN+"Updated successfully"+Color.RESET);
+                        }
+                        productsListUpdate.clear();
+                    } catch (SQLException e) {
+                        System.out.println("Error updating products: " + e.getMessage());
+                        throw e;
+                    }
                     break;
                 }
                 case "b":{
@@ -150,6 +166,7 @@ public class ProductDAOImpl implements ProductDAO {
     }
     @Override
     public void updateProduct(List<Product> product) {
+        ArrayList<Product> searchRowforShow = new ArrayList<>();
         ArrayList<String> renderUpdate = new ArrayList<>();
         Scanner cin = new Scanner(System.in);
         Product pm1 = new Product();
@@ -166,10 +183,10 @@ public class ProductDAOImpl implements ProductDAO {
                 int quantity = rs.getInt(3);
                 double unitPrice = rs.getDouble(4);
                 LocalDate importDate = rs.getDate(5).toLocalDate();
-                product.add(new Product(id,name,quantity,unitPrice,importDate));
+                searchRowforShow.add(new Product(id,name,quantity,unitPrice,importDate));
             }
-            ProductView.table(product);
-            product.clear();
+            ProductView.table(searchRowforShow);
+            searchRowforShow.clear();
             System.out.println("1. Name \t 2. Unit Price \t 3. Qty \t 4. All Field \t 5. Exit");
             int op=0;
             while (op!=5){
@@ -184,7 +201,7 @@ public class ProductDAOImpl implements ProductDAO {
                             int id = rs2.getInt(1);
                             int quantity = rs2.getInt(3);
                             double unitPrice = rs2.getDouble(4);
-                            LocalDate importDate = rs2.getDate(5).toLocalDate();
+                            LocalDate importDate = LocalDate.now();
                             product.add(new Product(id,name,quantity,unitPrice,importDate));
                         }
                         break;
@@ -196,7 +213,7 @@ public class ProductDAOImpl implements ProductDAO {
                             int id = rs3.getInt(1);
                             String name3 = rs3.getString(2);
                             int quantity = rs3.getInt(3);
-                            LocalDate importDate = rs3.getDate(5).toLocalDate();
+                            LocalDate importDate = LocalDate.now();
                             product.add(new Product(id,name3,quantity,uPrice,importDate));
                         }
                         break;
@@ -208,22 +225,23 @@ public class ProductDAOImpl implements ProductDAO {
                             int id = result.getInt(1);
                             String name4 = result.getString(2);
                             double unitPrice = result.getDouble(4);
-                            LocalDate importDate = result.getDate(5).toLocalDate();
+                            LocalDate importDate = LocalDate.now();
                             product.add(new Product(id,name4,qty,unitPrice,importDate));
                         }
                         break;
                     case 4:
                         System.out.print("Enter Name: ");
-                        String name1 = cin.nextLine();
+                        String name5 = cin.nextLine();
                         System.out.print("Enter Unit Price: ");
-                        double uPrice1 = Double.parseDouble(cin.nextLine());
+                        int uPrice5 = Integer.parseInt(cin.nextLine());
                         System.out.print("Enter Qty: ");
-                        int qty1 = Integer.parseInt(cin.nextLine());
-                        renderUpdate.add(String.valueOf(pm1.getId()));
-                        renderUpdate.add(String.valueOf(name1));
-                        renderUpdate.add(String.valueOf(uPrice1));
-                        renderUpdate.add(String.valueOf(qty1));
-                        renderUpdate.add(String.valueOf(pm1.getImportedDate()));
+                        double qty5 = Double.parseDouble(cin.nextLine());
+                        ResultSet rs4 = ps.executeQuery();
+                        while (rs4.next()){
+                            int id = rs4.getInt(1);
+                            LocalDate importDate5 = LocalDate.now();
+                            product.add(new Product(id,name5,uPrice5,qty5,importDate5));
+                        }
                         break;
                     default:
                         break;

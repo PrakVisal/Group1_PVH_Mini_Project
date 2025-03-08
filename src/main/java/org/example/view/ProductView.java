@@ -43,7 +43,7 @@ public class ProductView {
                         break;
                     }
                     case "sa":{
-                        productController.saveProduct(listUnsavedInsert);
+                        productController.saveProduct(listUnsavedInsert,listUnsavedUpdate);
                         break;
                     }
                     case "r":{

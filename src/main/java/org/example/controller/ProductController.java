@@ -9,8 +9,8 @@ import java.util.List;
 
 public class ProductController {
     ProductDAOImpl productDAO = new ProductDAOImpl();
-    public void saveProduct(List<Product> product) throws SQLException {
-        productDAO.saveProduct(product);
+    public void saveProduct(List<Product> productInsert,List<Product> productUpdate) throws SQLException {
+        productDAO.saveProduct(productInsert,productUpdate);
     }
     public void writeProduct(List<Product> product){
         productDAO.writeProduct(product);
