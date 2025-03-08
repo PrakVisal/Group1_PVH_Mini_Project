@@ -8,6 +8,7 @@ import org.example.validate.Validate;
 import org.example.view.ProductView;
 
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -23,6 +24,8 @@ public class ProductDAOImpl implements ProductDAO {
     private static int nextId = 1;
 
     private final DatabaseConnection databaseConnection;
+    private Date importedDate;
+
     public ProductDAOImpl() {
         this.databaseConnection = new DatabaseConnection();
         nextId = getMaxIdFromDatabase() + 1;
@@ -66,8 +69,14 @@ public class ProductDAOImpl implements ProductDAO {
             System.out.println("(Si) for save insert \t (Su) for save update \t (b) back");
             System.out.print("Enter option: ");
             option = sc.nextLine().trim().toLowerCase();
-            switch (option){
-                case "si":{
+
+            switch (option) {
+                case "si":
+                    if (productList == null || productList.isEmpty()) {
+                        System.out.println(Color.YELLOW+"No product inserted to the list."+Color.RESET);
+                        break;
+                    }
+
                     String query = "INSERT INTO product (product_name, quantity, unit_price, import_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
                     try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(query)) {
                         for (Product p : productList) {
@@ -75,27 +84,27 @@ public class ProductDAOImpl implements ProductDAO {
                             preparedStatement.setInt(2, p.getQuantity());
                             preparedStatement.setBigDecimal(3, new BigDecimal(p.getUnitPrice()));
                             preparedStatement.executeUpdate(); // Execute insert
-
                         }
-                        System.out.println("Inserted successfully");
+                        System.out.println("Inserted successfully.");
                         table(productList);
                     } catch (SQLException e) {
                         System.out.println("Error inserting products: " + e.getMessage());
                         throw e;
                     }
                     break;
-                }
-                case "su":{
+
+                case "su":
+
 
                     break;
-                }
-                case "b":{
-                    System.out.println(Color.YELLOW+"Exiting program..."+Color.RESET+"\n");
+
+                case "b":
+                    System.out.println(Color.YELLOW + "Exiting program..." + Color.RESET + "\n");
                     break;
-                }
             }
-        }while(!option.equalsIgnoreCase("b"));
+        } while (!option.equalsIgnoreCase("b"));
     }
+
     @Override
     public void unSaveProduct(List<Product> product) {
         String option = null;
@@ -156,8 +165,97 @@ public class ProductDAOImpl implements ProductDAO {
 
     @Override
     public void updateProduct(List<Product> product) {
+        Scanner cin = new Scanner(System.in);
+        String showUpdate = "SELECT id, product_name, quantity, unit_price, current_date AS importDate FROM product WHERE id = ?";
 
+        try (PreparedStatement ps = databaseConnection.getConnection().prepareStatement(showUpdate)) {
+            System.out.print("Input ID to update: ");
+            int idInput = Integer.parseInt(cin.nextLine());
+            ps.setInt(1, idInput);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                int id = rs.getInt(1);
+                String name = rs.getString(2);
+                int quantity = rs.getInt(3);
+                double unitPrice = rs.getDouble(4);
+                LocalDate importDate = rs.getDate(5).toLocalDate();
+
+                Product existingProduct = new Product(id, name, quantity, unitPrice, importDate);
+                product.add(existingProduct);
+                table(product);
+                product.clear();
+
+                System.out.println("1. Name \t 2. Unit Price \t 3. Quantity \t 4. All Fields \t 5. Exit");
+                int op = 0;
+                while (op != 5) {
+                    System.out.print("Choose an option to Update: ");
+                    op = Integer.parseInt(cin.nextLine());
+                    switch (op) {
+                        case 1:
+                            System.out.print("Enter new Name: ");
+                            String newName = cin.nextLine();
+                            existingProduct.setName(newName);
+                            break;
+
+                        case 2:
+                            System.out.print("Enter new Unit Price: ");
+                            double newUnitPrice = Double.parseDouble(cin.nextLine());
+                            existingProduct.setUnitPrice(newUnitPrice);
+                            break;
+
+                        case 3:
+                            System.out.print("Enter new Quantity: ");
+                            int newQuantity = Integer.parseInt(cin.nextLine());
+                            existingProduct.setQuantity(newQuantity);
+                            break;
+
+                        case 4:
+                            System.out.print("Enter new Name: ");
+                            String newNameAll = cin.nextLine();
+                            System.out.print("Enter new Unit Price: ");
+                            double newUnitPriceAll = Double.parseDouble(cin.nextLine());
+                            System.out.print("Enter new Quantity: ");
+                            int newQuantityAll = Integer.parseInt(cin.nextLine());
+
+                            existingProduct.setName(newNameAll);
+                            existingProduct.setUnitPrice(newUnitPriceAll);
+                            existingProduct.setQuantity(newQuantityAll);
+                            break;
+
+                        default:
+                            break;
+                    }
+                }
+
+                if (existingProduct.getImportedDate() == null) {
+                    existingProduct.setImportedDate(LocalDate.now());
+                }
+
+                String updateQuery = "UPDATE product SET product_name = ?, quantity = ?, unit_price = ?, import_date = ? WHERE id = ?";
+                try (PreparedStatement updatePs = databaseConnection.getConnection().prepareStatement(updateQuery)) {
+                    updatePs.setString(1, existingProduct.getName());
+                    updatePs.setInt(2, existingProduct.getQuantity());
+                    updatePs.setBigDecimal(3, new BigDecimal(existingProduct.getUnitPrice()));
+                    updatePs.setDate(4, Date.valueOf(existingProduct.getImportedDate()));
+                    updatePs.setInt(5, existingProduct.getId());
+
+                    int rowsUpdated = updatePs.executeUpdate();
+                    if (rowsUpdated > 0) {
+                        System.out.println("Product updated successfully.");
+                    } else {
+                        System.out.println("Failed to update the product.");
+                    }
+                }
+            } else {
+                System.out.println("No product found with ID: " + idInput);
+            }
+        } catch (SQLException ex) {
+            System.out.println("Error updating product: " + ex.getMessage());
+        }
     }
+
+
 
     @Override
     public void deleteProduct() {
@@ -187,7 +285,7 @@ public class ProductDAOImpl implements ProductDAO {
         try (PreparedStatement ps = databaseConnection.getConnection().prepareStatement(sql)) {
             ps.setInt(1, product.getId());
             ps.executeUpdate();
-            System.out.println("Product deleted successfully.");
+            System.out.println(Color.PURPLE+"Product deleted successfully."+Color.RESET);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -236,43 +334,36 @@ public class ProductDAOImpl implements ProductDAO {
             System.out.println(Color.RED+"Invalid ID. Please enter a valid number."+Color.RESET);
         }
 
+        System.out.println(Color.YELLOW+"Press any key to continue..."+Color.RESET);
+        sc.nextLine();
     }
 
 
     @Override
     public void searchProductbyName() {
-        System.out.print("Enter product name: ");
-        String inputName = sc.nextLine().trim();
+        System.out.print("Enter name: ");
+        String inputName = sc.nextLine();
+        String queryAlike = "SELECT * FROM product WHERE product_name LIKE ?";
+        List<Product> foundData = new ArrayList<>();
+        try(PreparedStatement ps = databaseConnection.getConnection().prepareStatement(queryAlike)){
+            ps.setString(1, "%"+inputName+"%");
+            ResultSet rs = ps.executeQuery();
+            while(rs.next()){
+                int id = rs.getInt("id");
+                String name = rs.getString("product_name");
+                int quantity = rs.getInt("quantity");
+                double unitPrice = rs.getDouble("unit_price");
+                LocalDate importDate = rs.getDate("import_date").toLocalDate();
+                foundData.add(new Product(id,name,quantity,unitPrice,importDate));
 
-        String query = "SELECT * FROM product WHERE product_name LIKE ?";
-
-        try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(query)) {
-            preparedStatement.setString(1, "%" + inputName + "%");
-
-            ResultSet resultSet = preparedStatement.executeQuery();
-            List<Product> matchedProducts = new ArrayList<>();
-
-            while (resultSet.next()) {
-                Product product = new Product(
-                        resultSet.getInt("id"),
-                        resultSet.getString("product_name"),
-                        resultSet.getInt("quantity"),
-                        resultSet.getDouble("unit_price"),
-                        resultSet.getDate("import_date").toLocalDate()
-                );
-                matchedProducts.add(product);
             }
+            ProductView.table(foundData);
+            System.out.println(Color.YELLOW+"Press any key to continue..."+Color.RESET);
+            sc.nextLine();
 
-            if (matchedProducts.isEmpty()) {
-                System.out.println(Color.RED+"No products found with the name: " + inputName+Color.RESET);
-            } else {
-                table(matchedProducts);
-            }
-
-        } catch (SQLException e) {
-            System.out.println(Color.RED+"Error querying the database: " + e.getMessage()+Color.RESET);
+        }catch (SQLException e){
+            e.printStackTrace();
         }
     }
-
 
 }

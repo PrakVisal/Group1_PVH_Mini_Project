@@ -1,7 +1,6 @@
 package org.example.model;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 public class Product {
     private int id;

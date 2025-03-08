@@ -25,7 +25,6 @@ public class ProductView {
 
             do {
                 List<Product> productList = productController.getAllProducts();
-                table(productList);
                 System.out.println("(W).Write \t (R).Read(id) \t (U).Update \t (D).Delete \t (S).Search(name) \t (Se).Set row");
                 System.out.println("(Sa).Save \t (Us).Unsaved \t (Ba).Backup \t (Re).Restore \t (E)Exit");
                 System.out.print("Choose an option:");
@@ -33,6 +32,7 @@ public class ProductView {
 
                 switch (option){
                     case "w":{
+                        table(productList);
                         productController.writeProduct(listUnsaved);
                         break;
                     }
@@ -65,6 +65,11 @@ public class ProductView {
                     }
                     case "s":{
                         productController.searchProductByName();
+                        break;
+                    }
+                    case "u":{
+                        table(productList);
+                        productController.updateData(listUnsaved);
                         break;
                     }
                     case "e":{

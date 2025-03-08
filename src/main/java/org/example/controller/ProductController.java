@@ -30,5 +30,8 @@ public class ProductController {
     public void searchProductByName(){
         productDAO.searchProductbyName();
     }
+    public void updateData(List<Product> product){
+        productDAO.updateProduct(product);
+    }
 }
 
