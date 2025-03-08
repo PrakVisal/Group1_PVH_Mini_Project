@@ -64,7 +64,7 @@ public class ProductDAOImpl implements ProductDAO {
     }
 
     @Override
-    public void saveProduct(List<Product> productList, List<Product> productsListUpdate) throws SQLException {
+    public void saveProduct(List<Product> productListInsert, List<Product> productsListUpdate) throws SQLException {
         String option;
         do {
             System.out.println("(Si) for save insert \t (Su) for save update \t (b) back");
@@ -73,22 +73,22 @@ public class ProductDAOImpl implements ProductDAO {
 
             switch (option) {
                 case "si":
-                    if (productList == null || productList.isEmpty()) {
+                    if (productListInsert == null || productListInsert.isEmpty()) {
                         System.out.println(Color.YELLOW+"No product inserted to the list."+Color.RESET);
                         break;
                     }
 
                     String query = "INSERT INTO product (product_name, quantity, unit_price, import_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
                     try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(query)) {
-                        for (Product p : productList) {
+                        for (Product p : productListInsert) {
                             preparedStatement.setString(1, p.getName());
                             preparedStatement.setInt(2, p.getQuantity());
                             preparedStatement.setBigDecimal(3, new BigDecimal(p.getUnitPrice()));
                             preparedStatement.executeUpdate(); // Execute insert
                         }
                         System.out.println("Inserted successfully.");
-                        table(productList);
-                        productList.clear();
+                        table(productListInsert);
+                        productListInsert.clear();
                     } catch (SQLException e) {
                         System.out.println("Error inserting products: " + e.getMessage());
                         throw e;
@@ -96,6 +96,11 @@ public class ProductDAOImpl implements ProductDAO {
                     break;
 
                 case "su":
+                    if (productsListUpdate == null || productsListUpdate.isEmpty()) {
+                        System.out.println(Color.YELLOW+"No product updated to the list."+Color.RESET);
+                        break;
+                    }
+
                     String updateQuery = "UPDATE product SET product_name = ?, quantity = ?, unit_price = ?, import_date = ? WHERE id = ?";
                     try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(updateQuery)) {
                         for (Product p : productsListUpdate) {
@@ -108,7 +113,7 @@ public class ProductDAOImpl implements ProductDAO {
 
                         }
                         System.out.println(Color.GREEN+"Updated successfully"+Color.RESET);
-                        table(productList);
+                        table(productsListUpdate);
                         productsListUpdate.clear();
                     } catch (SQLException e) {
                         System.out.println("Error updating products: " + e.getMessage());
