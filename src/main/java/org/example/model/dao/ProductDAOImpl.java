@@ -28,10 +28,10 @@ public class ProductDAOImpl implements ProductDAO {
             ResultSet rs = statement.executeQuery("select * from product");
             while(rs.next()){
                 int id = rs.getInt("id");
-                String name = rs.getString("product_name");
-                int quantity = rs.getInt("quantity");
-                double price = rs.getDouble("unit_price");
-                LocalDate importedDate = rs.getDate("import_date").toLocalDate();
+                String name = rs.getString("name");
+                int quantity = rs.getInt("qty");
+                double price = rs.getDouble("price");
+                LocalDate importedDate = rs.getDate("date").toLocalDate();
                 Product  product = new Product(id , name , quantity , price, importedDate);
                 allProducts.add(product);
             }
@@ -48,7 +48,7 @@ public class ProductDAOImpl implements ProductDAO {
             option = sc.nextLine();
             switch (option){
                 case "si":{
-                    String query = "INSERT INTO product (product_name, quantity, unit_price, import_date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
+                    String query = "INSERT INTO product (name, qty, price, date) VALUES (?, ?, ?, CURRENT_TIMESTAMP)";
                     try (PreparedStatement preparedStatement = databaseConnection.getConnection().prepareStatement(query)) {
                         for (Product p : productList) {
                             preparedStatement.setString(1, p.getName());
