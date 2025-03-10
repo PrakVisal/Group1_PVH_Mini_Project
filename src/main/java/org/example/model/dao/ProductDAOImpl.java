@@ -135,7 +135,6 @@ public class ProductDAOImpl implements ProductDAO {
     }
     @Override
     public void searchProductbyID() {
-//        ProductView.tableDisplay(getAllProducts());
             System.out.println("Enter id: ");
             int inputId = sc.nextInt();
                getAllProducts().stream().filter(product -> product.getId() == inputId).forEach(product -> {
