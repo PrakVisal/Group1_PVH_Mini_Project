@@ -24,9 +24,11 @@ public class ProductView {
         try{
             do {
                 List<Product> productList = productController.getAllProducts();
-                table(productList);
-                System.out.println("(W).Write \t (R).Read(id) \t (U).Update \t (D).Delete \t (S).Search(name) \t (Se).Set row");
-                System.out.println("(Sa).Save \t (Us).Unsaved \t (Ba).Backup \t (Re).Restore \t (E)Exit");
+                if(!productList.isEmpty()){
+                    table(productList);
+                }
+                System.out.println(Color.CYAN+"(W).Write \t (R).Read(id) \t (U).Update \t (D).Delete \t (S).Search(name) \t (Se).Set row"+Color.RESET);
+                System.out.println(Color.CYAN+"(Sa).Save \t (Us).Unsaved \t (Ba).Backup \t (Re).Restore \t (E)Exit"+Color.RESET);
                 System.out.print("Choose an option:");
                 option = sc.nextLine().trim().toLowerCase();
 
@@ -37,17 +39,6 @@ public class ProductView {
                     }
                     case "us":{
                         productController.unSaveProduct(listUnsavedInsert,listUnsavedUpdate);
-                        break;
-                    }
-                    case "0":{
-                        if(listUnsavedInsert.isEmpty()){
-                            System.out.println("No unsaved products.");
-
-                        }else {
-                            listUnsavedInsert.forEach(data -> {
-                                System.out.println(data.getName() + "\t" + data.getUnitPrice() + "\t" + data.getQuantity());
-                            });
-                        }
                         break;
                     }
                     case "sa":{
@@ -71,7 +62,7 @@ public class ProductView {
                         break;
                     }
                     case "e":{
-                        System.out.println("Exiting...");
+                        System.out.println(Color.RED+"Exiting..."+Color.RESET);
                         break;
                     }
                 }
