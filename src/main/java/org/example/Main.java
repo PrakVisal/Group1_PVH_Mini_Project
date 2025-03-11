@@ -13,10 +13,6 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-
-        ProductDAOImpl productDAO = new ProductDAOImpl();
-        List<Product> productList = productDAO.getAllProducts();
-        ProductView.table(productList);
         ProductView.displayProduct();
     }
 }

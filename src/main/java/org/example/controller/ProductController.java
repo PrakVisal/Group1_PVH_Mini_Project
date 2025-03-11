@@ -12,19 +12,19 @@ public class ProductController {
     public void saveProduct(List<Product> productInsert,List<Product> productUpdate) throws SQLException {
         productDAO.saveProduct(productInsert,productUpdate);
     }
-    public void writeProduct(List<Product> product) throws SQLException {
+    public void writeProduct(List<Product> product){
             productDAO.writeProduct(product);
     }
     public void unSaveProduct(List<Product> productInsert,List<Product>productUpdate) throws SQLException {
         productDAO.unSaveProduct(productInsert,productUpdate);
     }
-    public void seachProductbyID() throws SQLException {
+    public void seachProductbyID(){
         productDAO.searchProductbyID();
     }
-    public List<Product> getAllProducts() throws SQLException {
+    public List<Product> getAllProducts(){
         return productDAO.getAllProducts();
     }
-    public void deleteProductById() throws SQLException {
+    public void deleteProductById(){
         productDAO.deleteProduct();
     }
     public void searchProductByName(){

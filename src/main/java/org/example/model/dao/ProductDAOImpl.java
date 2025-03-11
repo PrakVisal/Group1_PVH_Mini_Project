@@ -67,7 +67,7 @@ public class ProductDAOImpl implements ProductDAO {
     public void saveProduct(List<Product> productListInsert, List<Product> productsListUpdate) throws SQLException {
         String option;
         do {
-            System.out.println("(Si) for save insert \t (Su) for save update \t (b) back");
+            System.out.println(Color.GREEN+"(Si) for save insert \t (Su) for save update \t (b) back"+Color.RESET);
             System.out.print("Enter option: ");
             option = sc.nextLine().trim().toLowerCase();
 
@@ -86,7 +86,7 @@ public class ProductDAOImpl implements ProductDAO {
                             preparedStatement.setBigDecimal(3, new BigDecimal(p.getUnitPrice()));
                             preparedStatement.executeUpdate(); // Execute insert
                         }
-                        System.out.println("Inserted successfully.");
+                        System.out.println(Color.GREEN+"Inserted successfully."+Color.RESET);
                         table(productListInsert);
                         productListInsert.clear();
                     } catch (SQLException e) {
@@ -264,11 +264,12 @@ public class ProductDAOImpl implements ProductDAO {
                             product.add(new Product(id,name5,uPrice5,qty5,importDate5));
                         }
                         break;
-                    default:
+                    default:{
+                        System.out.println("Please enter a valid option");
                         break;
+                    }
                 }
             }
-
         }catch (Exception ex){
             System.out.println("Error Update: " + ex);
         }
@@ -291,7 +292,6 @@ public class ProductDAOImpl implements ProductDAO {
                 System.out.println(Color.RED + "Invalid input. Please enter a valid numeric product ID." + Color.RESET);
             }
         }
-
         int finalIdInputed = idInputed;
         Product product = getAllProducts().stream()
                 .filter(e -> e.getId() == finalIdInputed)
