@@ -190,13 +190,13 @@ public class ProductDAOImpl implements ProductDAO {
     public void updateProduct(List<Product> product) {
         ArrayList<Product> searchRowforShow = new ArrayList<>();
         Scanner cin = new Scanner(System.in);
-        Product pm1 = new Product();
         String showUpdate = "SELECT id,product_name,quantity,to_char(unit_price,'FM$9999990.00') AS unit_price,current_date AS importDate FROM product WHERE id = ?";
 
         try(PreparedStatement ps = databaseConnection.getConnection().prepareStatement(showUpdate)){
             System.out.print("Input ID to update: ");
-            pm1.setId(Integer.parseInt(cin.nextLine()));
-            ps.setInt(1,pm1.getId());
+            int inputId = Integer.parseInt(cin.nextLine());
+            ps.setInt(1, inputId);
+
             ResultSet rs = ps.executeQuery();
             while (rs.next()){
                 int id = rs.getInt(1);
@@ -215,8 +215,12 @@ public class ProductDAOImpl implements ProductDAO {
                 op = Integer.parseInt(cin.nextLine());
                 switch (op){
                     case 1:
-                        System.out.print("Enter Name: ");
-                        String name = cin.nextLine();
+                        String name;
+                        do {
+                            System.out.print("Enter Name: ");
+                            name = cin.nextLine();
+                        }while (!Validate.validateName(name));
+
                         ResultSet rs2 = ps.executeQuery();
                         while (rs2.next()){
                             int id = rs2.getInt(1);
@@ -251,17 +255,21 @@ public class ProductDAOImpl implements ProductDAO {
                         }
                         break;
                     case 4:
-                        System.out.print("Enter Name: ");
-                        String name5 = cin.nextLine();
+                        String name5;
+                        do{
+                            System.out.print("Enter Name: ");
+                            name5 = cin.nextLine();
+                        }while (!Validate.validateName(name5));
+
                         System.out.print("Enter Unit Price: ");
-                        int uPrice5 = Integer.parseInt(cin.nextLine());
+                        double uPrice5 = Double.parseDouble(cin.nextLine());
                         System.out.print("Enter Qty: ");
-                        double qty5 = Double.parseDouble(cin.nextLine());
+                        int qty5 = Integer.parseInt(cin.nextLine());
                         ResultSet rs4 = ps.executeQuery();
                         while (rs4.next()){
                             int id = rs4.getInt(1);
                             LocalDate importDate5 = LocalDate.now();
-                            product.add(new Product(id,name5,uPrice5,qty5,importDate5));
+                            product.add(new Product(id,name5,qty5,uPrice5,importDate5));
                         }
                         break;
                     default:{
@@ -308,18 +316,22 @@ public class ProductDAOImpl implements ProductDAO {
         System.out.print("Are you sure you want to delete product ID: " + idInputed + "? (y/n): ");
         String deleteChoice = sc.nextLine().trim().toLowerCase();
 
-        if (deleteChoice.equals("n")) {
-            System.out.println("Product deletion canceled.");
+        if (deleteChoice.equalsIgnoreCase("n")) {
+            System.out.println(Color.RED+"Product deletion canceled."+Color.RESET);
             return;
+        }else if(deleteChoice.equalsIgnoreCase("y")){
+            String sql = "DELETE FROM product WHERE id = ?";
+            try (PreparedStatement ps = databaseConnection.getConnection().prepareStatement(sql)) {
+                ps.setInt(1, product.getId());
+                ps.executeUpdate();
+                System.out.println(Color.GREEN+"Product deleted successfully."+Color.RESET);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }else {
+            System.out.println(Color.RED+"Invalid option. Please enter a valid option."+Color.RESET);
         }
-        String sql = "DELETE FROM product WHERE id = ?";
-        try (PreparedStatement ps = databaseConnection.getConnection().prepareStatement(sql)) {
-            ps.setInt(1, product.getId());
-            ps.executeUpdate();
-            System.out.println(Color.PURPLE+"Product deleted successfully."+Color.RESET);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+
     }
 
 
@@ -374,7 +386,7 @@ public class ProductDAOImpl implements ProductDAO {
     public void searchProductbyName() {
         System.out.print("Enter name: ");
         String inputName = sc.nextLine();
-        String queryAlike = "SELECT * FROM product WHERE product_name LIKE ?";
+        String queryAlike = "SELECT * FROM product WHERE product_name ILIKE ?";
         List<Product> foundData = new ArrayList<>();
         try(PreparedStatement ps = databaseConnection.getConnection().prepareStatement(queryAlike)){
             ps.setString(1, "%"+inputName+"%");

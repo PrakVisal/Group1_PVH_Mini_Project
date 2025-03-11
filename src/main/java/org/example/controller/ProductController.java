@@ -15,7 +15,7 @@ public class ProductController {
     public void writeProduct(List<Product> product){
             productDAO.writeProduct(product);
     }
-    public void unSaveProduct(List<Product> productInsert,List<Product>productUpdate) throws SQLException {
+    public void unSaveProduct(List<Product> productInsert,List<Product>productUpdate){
         productDAO.unSaveProduct(productInsert,productUpdate);
     }
     public void seachProductbyID(){
