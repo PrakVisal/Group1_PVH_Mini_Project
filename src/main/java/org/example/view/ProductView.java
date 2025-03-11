@@ -22,8 +22,6 @@ public class ProductView {
         ArrayList<Product> listUnsavedUpdate = new ArrayList<>();
 
         try{
-
-
             do {
                 List<Product> productList = productController.getAllProducts();
                 table(productList);
@@ -34,7 +32,6 @@ public class ProductView {
 
                 switch (option){
                     case "w":{
-//                        table(productList);
                         productController.writeProduct(listUnsavedInsert);
                         break;
                     }
@@ -70,19 +67,16 @@ public class ProductView {
                         break;
                     }
                     case "u":{
-//                        table(productList);
                         productController.updateData(listUnsavedUpdate);
                         break;
                     }
                     case "e":{
-
                         System.out.println("Exiting...");
                         break;
                     }
                 }
             }while (!option.equalsIgnoreCase("e"));
         } catch (Exception e) {
-//            throw new RuntimeException(e);
             System.err.println("An error occurred: " + e.getMessage());
             e.printStackTrace();
         }
@@ -102,8 +96,8 @@ public class ProductView {
 
         t.addCell(Color.PURPLE + "ID" + Color.RESET, cellStyle);
         t.addCell(Color.PURPLE + "NAME" + Color.RESET, cellStyle);
-        t.addCell(Color.PURPLE + "UNIT PRICE" + Color.RESET, cellStyle);
         t.addCell(Color.PURPLE + "QTY" + Color.RESET, cellStyle);
+        t.addCell(Color.PURPLE + "UNIT PRICE" + Color.RESET, cellStyle);
         t.addCell(Color.PURPLE + "IMPORT DATE" + Color.RESET, cellStyle);
 
 
